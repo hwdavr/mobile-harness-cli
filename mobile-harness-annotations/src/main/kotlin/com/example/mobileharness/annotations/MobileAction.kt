@@ -7,6 +7,9 @@ public annotation class MobileAction(
     val name: String,
     val description: String = "",
     val parameters: Array<MobileActionParameter> = [],
+    /** Optional state predicate: `property=value1|value2`; otherwise await the next state change. */
+    val awaitForState: String = "",
+    val awaitForStateChange: Boolean = false,
 )
 
 /** Describes one JSON input mapped to a ViewModel action parameter. */

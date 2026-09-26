@@ -20,6 +20,7 @@ include(
     ":mobile-harness-annotations",
     ":mobile-harness-runtime",
     ":mobile-harness-ksp",
+    ":mobile-harness-android",
     ":sample-profile",
     ":sample-cli",
 )

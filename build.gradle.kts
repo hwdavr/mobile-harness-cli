@@ -1,4 +1,6 @@
 plugins {
+    id("com.android.library") version "8.5.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.0" apply false
     kotlin("jvm") version "2.0.0" apply false
     kotlin("plugin.serialization") version "2.0.0" apply false
     id("com.google.devtools.ksp") version "2.0.0-1.0.22" apply false

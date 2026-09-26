@@ -7,6 +7,7 @@ A compile-time annotation/code-generation library for JVM feature harnesses and 
 - `mobile-harness-annotations` — `@MobileFeature` and `@MobileAction` annotations. Keep this dependency tiny.
 - `mobile-harness-runtime` — `Feature`, `Transition`, harness protocol, JSON execution, semantic effect markers, and `ServiceLoader` discovery.
 - `mobile-harness-ksp` — KSP processor. Generates typed JVM feature adapters/providers and an Android ViewModel registry.
+- `mobile-harness-android` — Android instrumentation command executor, Hilt-compatible ViewModel host, action invocation, state waiting, and protocol serialization.
 - `sample-profile` — example feature showing the intended developer experience.
 - `sample-cli` — tiny demo CLI proving feature discovery without a manual registry.
 
@@ -86,10 +87,18 @@ There is no manual feature registry. Gradle still needs to know which modules be
 
 Annotate each app ViewModel with `@MobileFeature` and its callable methods with `@MobileAction`.
 KSP generates `com.example.mobileharness.generated.MobileViewModelRegistry` from all annotated
-ViewModels. An Android instrumentation harness can consume `viewModels` and construct each class
-through its existing Hilt-aware `ViewModelProvider`; registered ViewModels expose a `uiState`
-`StateFlow` for snapshots and resolve constructor dependencies from the production Hilt graph.
-Adding another ViewModel requires no manual registry or factory branch.
+ViewModels. `mobile-harness-android` provides the generic instrumentation command executor and
+resolves each class through the supplied activity's `ViewModelProvider`, so the app test only
+provides its generated registry, Hilt activity, and state serializer. Registered ViewModels expose
+a `uiState: StateFlow` for snapshots. Adding another ViewModel requires no registry, factory, or
+action-dispatch branch in the app instrumentation test.
+
+`@MobileAction(awaitForState = "status=Recording|Error", awaitForStateChange = true)` can describe
+an asynchronous completion predicate. Predicates use a serialized UI-state path and accepted value
+list; without one, the executor waits for the next state change. The CLI can override this per call
+with `_mobileHarnessAwait: {"path":"status","equals":"Recording"}`. Feature annotations can
+declare device permissions/system features and a conditional cleanup action, keeping those rules
+out of the shared command runner.
 
 For a local composite build, include this project from the Android app's settings:
 
@@ -103,6 +112,7 @@ Then add to the Android app module:
 dependencies {
     implementation("com.example.mobileharness:mobile-harness-annotations:0.1.0")
     ksp("com.example.mobileharness:mobile-harness-ksp:0.1.0")
+    androidTestImplementation("com.example.mobileharness:mobile-harness-android:0.1.0")
 }
 ```
 
